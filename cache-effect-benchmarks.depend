@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1425588851 source:/home/martin/work/cache-effect-benchmarks/main.cpp
+	<iostream>
+	"matrix_multiplication.h"
+
+1425588851 /home/martin/work/cache-effect-benchmarks/matrix_multiplication.h
+	<vector>
+	<cassert>
+	<initializer_list>
+
+1425589020 source:/home/martin/work/cache-effect-benchmarks/matrix_multiplication.cpp
+	"matrix_multiplication.h"
+
