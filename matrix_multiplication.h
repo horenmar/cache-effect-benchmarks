@@ -20,12 +20,12 @@ public:
         }
     }
 
-    const double& operator()(int x, int y) const {
-        return data[x*y + y];
+    const double& operator()(int row, int column) const {
+        return data[row*n + column];
     }
 
-    double& operator()(int x, int y){
-        return data[x*y + y];
+    double& operator()(int row, int column){
+        return data[row*n + column];
     }
 
     std::size_t rows() const {
