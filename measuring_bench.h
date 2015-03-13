@@ -1,3 +1,6 @@
+#pragma once
+#ifndef WTF_MEASURING_BENCH
+#define WTF_MEASURING_BENCH
 #include <chrono>
 
 template <typename Function>
@@ -15,3 +18,4 @@ std::chrono::nanoseconds bench(Function func, int iterations){
     return t2-t1;
 }
 
+#endif
