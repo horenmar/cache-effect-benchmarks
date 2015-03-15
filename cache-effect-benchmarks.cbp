@@ -22,7 +22,7 @@
 				<Option compiler="clang" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
-					<Add option="-O4" />
+					<Add option="-O3" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -34,9 +34,14 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
 		</Compiler>
+		<Unit filename="data_generation.cpp" />
+		<Unit filename="flatmap.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="matrix_multiplication.cpp" />
 		<Unit filename="matrix_multiplication.h" />
+		<Unit filename="measuring_bench.h" />
+		<Unit filename="utilities.cpp" />
+		<Unit filename="utilities.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
