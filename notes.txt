@@ -1,0 +1,18 @@
+Why: ACM short presentation
+What: measurement of performance effects caused by picking different data structures
+      or different algorithms, with the same algorithmical complexity.
+
+Measurements: 1) Matrix multiplication, the naive implementation vs bit smarter,
+                 work duplicating implementation.
+                      -- Done
+              2) Read only rb-tree based map, vs array-based flat map.
+              3) Heavy read, rare writes on the same.
+              4) Equal read to write ratio on the same.
+              5) Iterating (summing) over a sequence
+                  a) As an array
+			-- Done
+                  b) As a list
+			-- Done
+                  c) In reverse order
+                  d) In random order
+              6) Skipping work while iterating an array.
