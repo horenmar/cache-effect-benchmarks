@@ -6,13 +6,14 @@ Measurements: 1) Matrix multiplication, the naive implementation vs bit smarter,
                  work duplicating implementation.
                       -- Done
               2) Read only rb-tree based map, vs array-based flat map.
-              3) Heavy read, rare writes on the same.
-              4) Equal read to write ratio on the same.
+              3) Heavy read, rare writes on the same. (100 reads : 1 write)
+              4) Equal read to write ratio on the same. (1 read : 1 write)
               5) Iterating (summing) over a sequence
                   a) As an array
 			-- Done
                   b) As a list
 			-- Done
                   c) In reverse order
+			-- Done
                   d) In random order
               6) Skipping work while iterating an array.
