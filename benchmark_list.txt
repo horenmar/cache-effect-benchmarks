@@ -1,0 +1,7 @@
+reverse_sum_list
+reverse_sum_vector
+smarter_matrix_multiply
+naive_matrix_multiply
+sequential_sum_list
+sequential_sum_vector
+
