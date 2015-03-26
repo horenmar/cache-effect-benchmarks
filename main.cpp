@@ -5,6 +5,8 @@
 #include <fstream>
 #include <cstdint>
 #include <list>
+#include <ostream>
+#include <map>
 
 #include "matrix_multiplication.h"
 #include "flatmap.h"
@@ -13,32 +15,77 @@
 #include "utilities.h"
 
 constexpr std::size_t rep_count = 10;
+constexpr std::size_t smallest_sequence = 8;
+constexpr std::size_t largest_sequence = 10000000;
+constexpr std::size_t smallest_matrix = 2;
+constexpr std::size_t largest_matrix = 10000;
+
+using measurements = std::vector<std::pair<int, std::uint64_t>>;
 
 template <typename Container>
-std::vector<std::pair<int, std::uint64_t>> measure_iteration(int start_at, int end_at);
+measurements measure_iteration(int start_at, int end_at);
 template <typename MultiplyMethod>
-std::vector<std::pair<int, std::uint64_t>> measure_matrix_multiplication(int start_at, int end_at, MultiplyMethod method);
+measurements measure_matrix_multiplication(int start_at, int end_at, MultiplyMethod method);
+template <typename Container>
+measurements measure_reversed_iteration(int start_at, int end_at);
 
-int main(){
-
-    flatmap<int, int> map({{1, 2}, {2, 4}, {4, 6}});
-
-    auto vec_results = measure_iteration<std::vector<int>>(8, 10000000);
-    auto list_results = measure_iteration<std::list<int>>(8, 10000000);
-
-    std::cout << "N\t\tVector\t\tList\n";
-    for (int i = 0; i < vec_results.size(); ++i){
-        std::cout << vec_results[i].first << "\t\t" << vec_results[i].second << "\t" << list_results[i].second << "\t" << static_cast<double>(vec_results[i].second) / list_results[i].second << std::endl;
+void print_results(std::ostream& out, const measurements& results){
+    for (const auto& pair : results){
+        out << pair.first << ",\t\t" << pair.second << '\n';
     }
+}
 
-    std::cout << "FINISHED VECTOR X LIST.\n\n\n";
+void sequential_sum_vector(std::ostream& out){
+    auto results = measure_iteration<std::vector<int>>(smallest_sequence, largest_sequence);
+    out << "N,\t\tVector\n";
+    print_results(out, results);
+}
 
-    auto naive_multiply_results = measure_matrix_multiplication(2, 10000, multiply_naive);
-    auto better_multiply_results = measure_matrix_multiplication(2, 10000, multiply_smarter);
+void sequential_sum_list(std::ostream& out){
+    auto results = measure_iteration<std::list<int>>(smallest_sequence, largest_sequence);
+    out << "N,\t\tList\n";
+    print_results(out, results);
+}
 
-    std::cout << "N\t\tNaive\t\tBetter\n";
-    for (int i = 0; i < naive_multiply_results.size(); ++i){
-        std::cout << naive_multiply_results[i].first << "\t\t" << naive_multiply_results[i].second << "\t" << better_multiply_results[i].second << '\t' << static_cast<double>(naive_multiply_results[i].second) / better_multiply_results[i].second << std::endl;
+void naive_matrix_multiply(std::ostream& out){
+    auto results = measure_matrix_multiplication(smallest_matrix, largest_matrix, multiply_naive);
+    out << "N,\t\tNaive\n";
+    print_results(out, results);
+}
+
+void smarter_matrix_multiply(std::ostream& out){
+    auto results = measure_matrix_multiplication(smallest_matrix, largest_matrix, multiply_smarter);
+    out << "N,\t\tSmarter\n";
+    print_results(out, results);
+}
+
+void reverse_sum_vector(std::ostream& out){
+    auto results = measure_reversed_iteration<std::vector<int>>(smallest_sequence, largest_sequence);
+    out << "N,\t\tReverse Vector\n";
+    print_results(out, results);
+}
+
+void reverse_sum_list(std::ostream& out) {
+    auto results = measure_reversed_iteration<std::list<int>>(smallest_sequence, largest_sequence);
+    out << "N,\t\tReverse List\n";
+    print_results(out, results);
+}
+
+using bencher = void (*)(std::ostream&);
+std::map<std::string, bencher> benches = {
+    {"reverse_sum_list", reverse_sum_list},
+    {"reverse_sum_vector", reverse_sum_vector},
+    {"smarter_matrix_multiply", smarter_matrix_multiply},
+    {"naive_matrix_multiply", naive_matrix_multiply},
+    {"sequential_sum_list", sequential_sum_list},
+    {"sequential_sum_vector", sequential_sum_vector}
+};
+
+int main(int argc, char** argv){
+
+    std::vector<std::string> args(argv+1, argv+argc);
+    for (const auto& arg : args){
+        benches[arg](std::cout);
     }
 
     return 0;
@@ -54,7 +101,7 @@ int main(){
  * Returns range of <size, ns taken> values.
  */
 template <typename Container>
-std::vector<std::pair<int, uint64_t>> measure_iteration(int start_at, int end_at){
+measurements measure_iteration(int start_at, int end_at){
 
     //clamp the results
     start_at = lower_power_of_2(std::max(start_at, 8));
@@ -74,6 +121,28 @@ std::vector<std::pair<int, uint64_t>> measure_iteration(int start_at, int end_at
     return results;
 }
 
+template <typename Container>
+measurements measure_reversed_iteration(int start_at, int end_at){
+
+    //clamp the results
+    start_at = lower_power_of_2(std::max(start_at, 8));
+    end_at = upper_power_of_2(std::min(end_at, static_cast<int>(std::pow(2, 27))));
+
+    std::vector<std::pair<int, uint64_t>> results;
+    results.reserve(32);
+
+    for (int n = end_at; n >= start_at; n /= 2){
+        auto data = generate_random_sequence(n);
+        Container test_data(begin(data), end(data));
+        auto time = bench([=](){return std::accumulate(test_data.rbegin(), test_data.rend(), 0);}, rep_count).count();
+        results.emplace_back(n, time);
+    }
+
+    std::reverse(begin(results), end(results));
+    return results;
+}
+
+
 /* Measures multiplication speed of matrices.
  *
  * start_at is first converted to nearest, lower power of two and then it is clamped at 2
@@ -83,7 +152,7 @@ std::vector<std::pair<int, uint64_t>> measure_iteration(int start_at, int end_at
  * Returns range of <size, ns taken> values.
  */
 template <typename MultiplyMethod>
-std::vector<std::pair<int, std::uint64_t>> measure_matrix_multiplication(int start_at, int end_at, MultiplyMethod method){
+measurements measure_matrix_multiplication(int start_at, int end_at, MultiplyMethod method){
     //clam the results
     start_at = lower_power_of_2(std::max(start_at, 2));
     end_at = upper_power_of_2(std::min(end_at, static_cast<int>(std::pow(2, 11))));
@@ -103,3 +172,4 @@ std::vector<std::pair<int, std::uint64_t>> measure_matrix_multiplication(int sta
     return results;
 
 }
+
