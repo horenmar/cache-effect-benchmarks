@@ -4,7 +4,7 @@ What: measurement of performance effects caused by picking different data struct
 
 Measurements: 1) Matrix multiplication, the naive implementation vs bit smarter,
                  work duplicating implementation.
-                      -- Done
+			-- Done
               2) Read only rb-tree based map, vs array-based flat map.
               3) Heavy read, rare writes on the same. (100 reads : 1 write)
               4) Equal read to write ratio on the same. (1 read : 1 write)
@@ -17,3 +17,4 @@ Measurements: 1) Matrix multiplication, the naive implementation vs bit smarter,
 			-- Done
                   d) In random order
               6) Skipping work while iterating an array.
+			--Done

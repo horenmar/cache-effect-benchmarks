@@ -15,19 +15,22 @@
 #include "utilities.h"
 
 constexpr std::size_t rep_count = 10;
-constexpr std::size_t smallest_sequence = 8;
-constexpr std::size_t largest_sequence = 10000000;
-constexpr std::size_t smallest_matrix = 2;
-constexpr std::size_t largest_matrix = 10000;
+constexpr std::size_t smallest_sequence = 1 << 3;
+constexpr std::size_t largest_sequence = 1 << 27;
+constexpr std::size_t smallest_matrix = 1 << 1;
+constexpr std::size_t largest_matrix = 1 << 11;
+constexpr std::size_t smallest_step = 1 << 0;
+constexpr std::size_t largest_step = 1 << 10;
 
 using measurements = std::vector<std::pair<int, std::uint64_t>>;
 
 template <typename Container>
-measurements measure_iteration(int start_at, int end_at);
+measurements measure_iteration(std::size_t start_at, std::size_t end_at);
 template <typename MultiplyMethod>
-measurements measure_matrix_multiplication(int start_at, int end_at, MultiplyMethod method);
+measurements measure_matrix_multiplication(std::size_t start_at, std::size_t end_at, MultiplyMethod method);
 template <typename Container>
-measurements measure_reversed_iteration(int start_at, int end_at);
+measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at);
+measurements measure_vector_skip(std::size_t first_step, std::size_t last_step);
 
 void print_results(std::ostream& out, const measurements& results){
     for (const auto& pair : results){
@@ -71,6 +74,12 @@ void reverse_sum_list(std::ostream& out) {
     print_results(out, results);
 }
 
+void vector_element_skip(std::ostream& out){
+    auto results = measure_vector_skip(smallest_step, largest_step);
+    out << "N,\t\tVector Stepping\n";
+    print_results(out, results);
+}
+
 using bencher = void (*)(std::ostream&);
 std::map<std::string, bencher> benches = {
     {"reverse_sum_list", reverse_sum_list},
@@ -78,7 +87,8 @@ std::map<std::string, bencher> benches = {
     {"smarter_matrix_multiply", smarter_matrix_multiply},
     {"naive_matrix_multiply", naive_matrix_multiply},
     {"sequential_sum_list", sequential_sum_list},
-    {"sequential_sum_vector", sequential_sum_vector}
+    {"sequential_sum_vector", sequential_sum_vector},
+    {"vector_element_skip", vector_element_skip}
 };
 
 int main(int argc, char** argv){
@@ -101,13 +111,13 @@ int main(int argc, char** argv){
  * Returns range of <size, ns taken> values.
  */
 template <typename Container>
-measurements measure_iteration(int start_at, int end_at){
+measurements measure_iteration(std::size_t start_at, std::size_t end_at){
 
     //clamp the results
-    start_at = lower_power_of_2(std::max(start_at, 8));
-    end_at = upper_power_of_2(std::min(end_at, static_cast<int>(std::pow(2, 27))));
+    start_at = lower_power_of_2(std::max(start_at, smallest_sequence));
+    end_at = upper_power_of_2(std::min(end_at, largest_sequence));
 
-    std::vector<std::pair<int, uint64_t>> results;
+    measurements results;
     results.reserve(32);
 
     for (int n = end_at; n >= start_at; n /= 2){
@@ -122,13 +132,13 @@ measurements measure_iteration(int start_at, int end_at){
 }
 
 template <typename Container>
-measurements measure_reversed_iteration(int start_at, int end_at){
+measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at){
 
     //clamp the results
-    start_at = lower_power_of_2(std::max(start_at, 8));
-    end_at = upper_power_of_2(std::min(end_at, static_cast<int>(std::pow(2, 27))));
+    start_at = lower_power_of_2(std::max(start_at, smallest_sequence));
+    end_at = upper_power_of_2(std::min(end_at, largest_sequence));
 
-    std::vector<std::pair<int, uint64_t>> results;
+    measurements results;
     results.reserve(32);
 
     for (int n = end_at; n >= start_at; n /= 2){
@@ -152,12 +162,12 @@ measurements measure_reversed_iteration(int start_at, int end_at){
  * Returns range of <size, ns taken> values.
  */
 template <typename MultiplyMethod>
-measurements measure_matrix_multiplication(int start_at, int end_at, MultiplyMethod method){
+measurements measure_matrix_multiplication(std::size_t start_at, std::size_t end_at, MultiplyMethod method){
     //clam the results
-    start_at = lower_power_of_2(std::max(start_at, 2));
-    end_at = upper_power_of_2(std::min(end_at, static_cast<int>(std::pow(2, 11))));
+    start_at = lower_power_of_2(std::max(start_at, smallest_matrix));
+    end_at = upper_power_of_2(std::min(end_at, largest_matrix));
 
-    std::vector<std::pair<int, uint64_t>> results;
+    measurements results;
     results.reserve(16);
 
     for (int n = end_at; n >= start_at; n /= 2){
@@ -173,3 +183,23 @@ measurements measure_matrix_multiplication(int start_at, int end_at, MultiplyMet
 
 }
 
+measurements measure_vector_skip(std::size_t first_step, std::size_t last_step){
+    first_step = lower_power_of_2(std::max(first_step, smallest_step));
+    last_step = upper_power_of_2(std::min(last_step, largest_step));
+
+    measurements results;
+    results.reserve(16);
+
+    for (int step_size = first_step; step_size <= last_step; step_size *= 2){
+        auto data = generate_random_sequence(largest_sequence);
+        auto time = bench([=](){
+            uint32_t result = 0;
+            for (int i = 0; i < largest_sequence; i += step_size){
+                result += data[i];
+            }
+            return result;
+        }, rep_count).count();
+        results.emplace_back(step_size, time);
+    }
+    return results;
+}
