@@ -16,5 +16,6 @@ Measurements: 1) Matrix multiplication, the naive implementation vs bit smarter,
                   c) In reverse order
 			-- Done
                   d) In random order
+			-- Done
               6) Skipping work while iterating an array.
 			--Done

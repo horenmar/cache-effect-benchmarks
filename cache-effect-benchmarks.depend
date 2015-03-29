@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1426424563 source:/home/martin/work/cache-effect-benchmarks/main.cpp
+1427298790 source:/home/martin/work/cache-effect-benchmarks/main.cpp
 	<iostream>
 	<vector>
 	<utility>
@@ -7,6 +7,7 @@
 	<fstream>
 	<cstdint>
 	<list>
+	<ostream>
 	"matrix_multiplication.h"
 	"flatmap.h"
 	"measuring_bench.h"
