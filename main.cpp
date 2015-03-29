@@ -13,6 +13,7 @@
 #include "measuring_bench.h"
 #include "data_generation.h"
 #include "utilities.h"
+#include "min_LCG.h"
 
 constexpr std::size_t rep_count = 10;
 constexpr std::size_t smallest_sequence = 1 << 3;
@@ -31,6 +32,7 @@ measurements measure_matrix_multiplication(std::size_t start_at, std::size_t end
 template <typename Container>
 measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at);
 measurements measure_vector_skip(std::size_t first_step, std::size_t last_step);
+measurements measure_random_iteration(std::size_t start_at, std::size_t end_at);
 
 void print_results(std::ostream& out, const measurements& results){
     for (const auto& pair : results){
@@ -80,6 +82,12 @@ void vector_element_skip(std::ostream& out){
     print_results(out, results);
 }
 
+void random_sum_vector(std::ostream& out){
+    auto results = measure_vector_skip(smallest_step, largest_step);
+    out << "N,\t\tRandom Iteration\n";
+    print_results(out, results);
+}
+
 using bencher = void (*)(std::ostream&);
 std::map<std::string, bencher> benches = {
     {"reverse_sum_list", reverse_sum_list},
@@ -88,7 +96,8 @@ std::map<std::string, bencher> benches = {
     {"naive_matrix_multiply", naive_matrix_multiply},
     {"sequential_sum_list", sequential_sum_list},
     {"sequential_sum_vector", sequential_sum_vector},
-    {"vector_element_skip", vector_element_skip}
+    {"vector_element_skip", vector_element_skip},
+    {"random_sum_vector", random_sum_vector}
 };
 
 int main(int argc, char** argv){
@@ -131,6 +140,14 @@ measurements measure_iteration(std::size_t start_at, std::size_t end_at){
     return results;
 }
 
+/* Measures reversed iteration+summation speed of list and vector.
+ *
+ * start_at is first converted to nearest, lower power of two and then it is clamped at 8
+ * end_at is first converted to nearest, higher power of two and then it is clamped at 2**27 to prevent excessive memory pressure.
+ *
+ *
+ * Returns range of <size, ns taken> values.
+ */
 template <typename Container>
 measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at){
 
@@ -163,7 +180,7 @@ measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at
  */
 template <typename MultiplyMethod>
 measurements measure_matrix_multiplication(std::size_t start_at, std::size_t end_at, MultiplyMethod method){
-    //clam the results
+    //clamp the results
     start_at = lower_power_of_2(std::max(start_at, smallest_matrix));
     end_at = upper_power_of_2(std::min(end_at, largest_matrix));
 
@@ -183,12 +200,16 @@ measurements measure_matrix_multiplication(std::size_t start_at, std::size_t end
 
 }
 
+/* First attempt at implementing skipping iteration.
+ *
+ * Might need to be changed to dirty cache lines before final benchmarking.
+ */
 measurements measure_vector_skip(std::size_t first_step, std::size_t last_step){
     first_step = lower_power_of_2(std::max(first_step, smallest_step));
     last_step = upper_power_of_2(std::min(last_step, largest_step));
 
     measurements results;
-    results.reserve(16);
+    results.reserve(32);
 
     for (int step_size = first_step; step_size <= last_step; step_size *= 2){
         auto data = generate_random_sequence(largest_sequence);
@@ -201,5 +222,33 @@ measurements measure_vector_skip(std::size_t first_step, std::size_t last_step){
         }, rep_count).count();
         results.emplace_back(step_size, time);
     }
+    return results;
+}
+
+/* A first attempt at implementing random iteration.
+ *
+ * Hopefully the LCG-based RNG isn't too complicated to skew the results too much.
+ */
+measurements measure_random_iteration(std::size_t start_at, std::size_t end_at){
+    start_at = lower_power_of_2(std::max(start_at, smallest_sequence));
+    end_at = upper_power_of_2(std::min(end_at, largest_sequence));
+
+    LCG RNG;
+    measurements results;
+    results.reserve(32);
+
+    for (int n = end_at; n >= start_at; n /= 2){
+        auto data = generate_random_sequence(n);
+        auto time = bench([=](){
+            uint32_t temp = 0;
+            for (int i = 0; i < n; ++i){
+                temp += data[RNG.get_next() & n];
+            }
+            return temp;
+        }, rep_count).count();
+        results.emplace_back(n, time);
+    }
+
+    std::reverse(begin(results), end(results));
     return results;
 }
