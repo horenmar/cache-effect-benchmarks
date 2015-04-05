@@ -13,7 +13,8 @@ std::chrono::nanoseconds bench(Function func, int iterations){
     }
     auto t2 = std::chrono::steady_clock::now();
     //write to volatile
-    volatile int c = temp;
+    static volatile int c;
+    c = c + temp;
     //take t2;
     return t2-t1;
 }

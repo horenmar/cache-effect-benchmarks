@@ -129,7 +129,7 @@ measurements measure_iteration(std::size_t start_at, std::size_t end_at){
     measurements results;
     results.reserve(32);
 
-    for (int n = end_at; n >= start_at; n /= 2){
+    for (auto n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
         Container test_data(begin(data), end(data));
         auto time = bench([=](){return std::accumulate(begin(test_data), end(test_data), 0);}, rep_count).count();
@@ -158,7 +158,7 @@ measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at
     measurements results;
     results.reserve(32);
 
-    for (int n = end_at; n >= start_at; n /= 2){
+    for (auto n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
         Container test_data(begin(data), end(data));
         auto time = bench([=](){return std::accumulate(test_data.rbegin(), test_data.rend(), 0);}, rep_count).count();
@@ -187,7 +187,7 @@ measurements measure_matrix_multiplication(std::size_t start_at, std::size_t end
     measurements results;
     results.reserve(16);
 
-    for (int n = end_at; n >= start_at; n /= 2){
+    for (auto n = end_at; n >= start_at; n /= 2){
         auto matrix1 = generate_matrix(n, n);
         auto matrix2 = generate_matrix(n, n);
 
@@ -211,11 +211,11 @@ measurements measure_vector_skip(std::size_t first_step, std::size_t last_step){
     measurements results;
     results.reserve(32);
 
-    for (int step_size = first_step; step_size <= last_step; step_size *= 2){
+    for (auto step_size = first_step; step_size <= last_step; step_size *= 2){
         auto data = generate_random_sequence(largest_sequence);
         auto time = bench([=](){
             uint32_t result = 0;
-            for (int i = 0; i < largest_sequence; i += step_size){
+            for (std::size_t i = 0; i < largest_sequence; i += step_size){
                 result += data[i];
             }
             return result;
@@ -237,11 +237,11 @@ measurements measure_random_iteration(std::size_t start_at, std::size_t end_at){
     measurements results;
     results.reserve(32);
 
-    for (int n = end_at; n >= start_at; n /= 2){
+    for (auto n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
         auto time = bench([=, &RNG](){
             uint32_t temp = 0;
-            for (int i = 0; i < n; ++i){
+            for (std::size_t i = 0; i < n; ++i){
                 temp += data[RNG.get_next() & n];
             }
             return temp;
