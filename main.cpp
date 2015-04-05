@@ -100,9 +100,27 @@ std::map<std::string, bencher> benches = {
     {"random_sum_vector", random_sum_vector}
 };
 
+void print_help() {
+    std::cerr << "Specify a benchmark:" << std::endl;
+    for (const auto& test : benches) {
+        std::cerr << "    " << test.first << std::endl;
+    }
+}
+
 int main(int argc, char** argv){
 
     std::vector<std::string> args(argv+1, argv+argc);
+    if (args.size() == 0) {
+        print_help();
+        return 1;
+    }
+    for (const auto& arg : args) {
+        if (benches.find(arg) == end(benches)) {
+            std::cerr << "I don't understand '" << arg << "'. " << std::endl;
+            print_help();
+            return 1;
+        }
+    }
     for (const auto& arg : args){
         benches[arg](std::cout);
     }
