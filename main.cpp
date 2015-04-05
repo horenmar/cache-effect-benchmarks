@@ -239,7 +239,7 @@ measurements measure_random_iteration(std::size_t start_at, std::size_t end_at){
 
     for (int n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
-        auto time = bench([=](){
+        auto time = bench([=, &RNG](){
             uint32_t temp = 0;
             for (int i = 0; i < n; ++i){
                 temp += data[RNG.get_next() & n];
