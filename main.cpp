@@ -33,6 +33,9 @@ template <typename Container>
 measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at);
 measurements measure_vector_skip(std::size_t first_step, std::size_t last_step);
 measurements measure_random_iteration(std::size_t start_at, std::size_t end_at);
+template <typename Container, std::size_t N_reads, std::size_t N_writes>
+measurements measure_random_access(std::size_t start_at, std::size_t end_at);
+
 
 void print_results(std::ostream& out, const measurements& results){
     for (const auto& pair : results){
@@ -85,6 +88,18 @@ void vector_element_skip(std::ostream& out){
 void random_sum_vector(std::ostream& out){
     auto results = measure_vector_skip(smallest_step, largest_step);
     out << "N,\t\tRandom Iteration\n";
+    print_results(out, results);
+}
+
+void read_map(std::ostream& out){
+    auto results = measure_random_access<std::map<int, int>, 1, 0>(smallest_sequence, largest_sequence);
+    out << "N,\t\tRead Map\n";
+    print_results(out, results);
+}
+
+void read_flatmap(std::ostream& out){
+    auto results = measure_random_access<flatmap<int, int>, 1, 0>(smallest_sequence, largest_sequence);
+    out << "N,\t\tRead Flatmap\n";
     print_results(out, results);
 }
 
@@ -257,13 +272,55 @@ measurements measure_random_iteration(std::size_t start_at, std::size_t end_at){
 
     for (auto n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
+        auto mask = n - 1;
         auto time = bench([=, &RNG](){
             uint32_t temp = 0;
             for (std::size_t i = 0; i < n; ++i){
-                temp += data[RNG.get_next() & n];
+                temp += data[RNG.get_next() & mask];
             }
             return temp;
         }, rep_count).count();
+        results.emplace_back(n, time);
+    }
+
+    std::reverse(begin(results), end(results));
+    return results;
+}
+
+/* Random reads, writes.
+ */
+template <typename Container, std::size_t N_reads, std::size_t N_writes>
+measurements measure_random_access(std::size_t start_at, std::size_t end_at){
+    static constexpr auto N_total = N_reads + N_writes;
+    static_assert(is_power_of_2(N_total), "N_reads + N_writes must be a power of two.");
+    start_at = lower_power_of_2(std::max(start_at, std::max(smallest_sequence, N_total)));
+    end_at = upper_power_of_2(std::min(end_at, largest_sequence));
+
+    LCG RNG;
+    measurements results;
+    results.reserve(32);
+
+    for (auto n = end_at; n >= start_at; n /= 2){
+        auto data_gen = generate_random_pairs(n);
+        Container data(data_gen.begin(), data_gen.end());
+        auto mask = n - 1;
+
+        auto time = bench([=, &RNG, &data](){
+            uint32_t temp = 0;
+
+            for (std::size_t i = 0; i < n; i += N_total){
+                for (std::size_t j = 0; j < N_reads; ++j){
+                    temp += data.find(RNG.get_next() & mask)->second;
+                }
+
+                for (std::size_t j = 0; j < N_writes; ++j) {
+                    data.find(RNG.get_next() & mask)->second = temp;
+                }
+            }
+
+            return temp;
+        }, rep_count).count();
+
         results.emplace_back(n, time);
     }
 

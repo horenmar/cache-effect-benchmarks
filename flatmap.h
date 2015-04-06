@@ -31,7 +31,7 @@ public:
     std::pair<iterator, bool> insert(const pair_type& elem){
         //find + insert
         auto it = find(elem.first);
-        if (it != end(data)){
+        if (it != std::end(data)){
             return {it, false};
         } else {
             return {insert(it, elem), true};
@@ -43,11 +43,12 @@ public:
     }
 
     iterator find(const key_type& key){
-        auto it = std::lower_bound(begin(data), end(data), key);
-        if (it != end(data) && *it == key){
+        pair_type key_dummy (key, value_type());
+        auto it = std::lower_bound(std::begin(data), std::end(data), key_dummy);
+        if (it != std::end(data) && it->first == key){
             return it;
         } else {
-            return end(data);
+            return std::end(data);
         }
     }
 
