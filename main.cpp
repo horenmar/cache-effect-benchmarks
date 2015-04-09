@@ -93,13 +93,13 @@ void random_sum_vector(std::ostream& out){
 
 void read_map(std::ostream& out){
     auto results = measure_random_access<std::map<int, int>, 1, 0>(smallest_sequence, largest_sequence);
-    out << "N,\t\tRead Map\n";
+    out << "N,\t\tRead Map (read only)\n";
     print_results(out, results);
 }
 
 void read_flatmap(std::ostream& out){
     auto results = measure_random_access<flatmap<int, int>, 1, 0>(smallest_sequence, largest_sequence);
-    out << "N,\t\tRead Flatmap\n";
+    out << "N,\t\tRead Flatmap (read only)\n";
     print_results(out, results);
 }
 
