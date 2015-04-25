@@ -18,6 +18,8 @@
 constexpr std::size_t rep_count = 10;
 constexpr std::size_t smallest_sequence = 1 << 3;
 constexpr std::size_t largest_sequence = 1 << 27;
+constexpr std::size_t smallest_map = 1 << 3;
+constexpr std::size_t largest_map = 1 << 20; //Separate from sequence, because at 1 << 27, maps were untractable.
 constexpr std::size_t smallest_matrix = 1 << 1;
 constexpr std::size_t largest_matrix = 1 << 11;
 constexpr std::size_t smallest_step = 1 << 0;
@@ -92,16 +94,36 @@ void random_sum_vector(std::ostream& out){
 }
 
 void read_map(std::ostream& out){
-    auto results = measure_random_access<std::map<int, int>, 1, 0>(smallest_sequence, largest_sequence);
-    out << "N,\t\tRead Map (read only)\n";
+    auto results = measure_random_access<std::map<int, int>, 1, 0>(smallest_map, largest_map);
+    out << "N,\t\tRead Map (1 : 0 (read only))\n";
+    print_results(out, results);
+}
+void read_flatmap(std::ostream& out){
+    auto results = measure_random_access<flatmap<int, int>, 1, 0>(smallest_map, largest_map);
+    out << "N,\t\tRead Flatmap (1 : 0 (read only))\n";
+    print_results(out, results);
+}
+void read_write_map(std::ostream& out){
+    auto results = measure_random_access<std::map<int, int>, 1, 1>(smallest_map, largest_map);
+    out << "N,\t\tRead Map (1 : 1 (read, write))\n";
+    print_results(out, results);
+}
+void read_write_flatmap(std::ostream& out){
+    auto results = measure_random_access<flatmap<int, int>, 1, 1>(smallest_map, largest_map);
+    out << "N,\t\tRead Flatmap (1 : 1 (read, write))\n";
+    print_results(out, results);
+}
+void read_heavy_map(std::ostream& out){
+    auto results = measure_random_access<std::map<int, int>, 15, 1>(smallest_map, largest_map);
+    out << "N,\t\tRead Map (15 : 1 (read heavy))\n";
+    print_results(out, results);
+}
+void read_heavy_flatmap(std::ostream& out){
+    auto results = measure_random_access<flatmap<int, int>, 15, 1>(smallest_map, largest_map);
+    out << "N,\t\tRead Flatmap (15 : 1 (read heavy))\n";
     print_results(out, results);
 }
 
-void read_flatmap(std::ostream& out){
-    auto results = measure_random_access<flatmap<int, int>, 1, 0>(smallest_sequence, largest_sequence);
-    out << "N,\t\tRead Flatmap (read only)\n";
-    print_results(out, results);
-}
 
 using bencher = void (*)(std::ostream&);
 std::map<std::string, bencher> benches = {
@@ -112,8 +134,16 @@ std::map<std::string, bencher> benches = {
     {"sequential_sum_list", sequential_sum_list},
     {"sequential_sum_vector", sequential_sum_vector},
     {"vector_element_skip", vector_element_skip},
-    {"random_sum_vector", random_sum_vector}
+    {"random_sum_vector", random_sum_vector},
+    {"read_map", read_map},
+    {"read_flatmap", read_flatmap},
+    {"read_write_map", read_write_map},
+    {"read_write_flatmap", read_write_flatmap},
+    {"read_heavy_map", read_heavy_map},
+    {"read_heavy_flatmap", read_heavy_flatmap}
 };
+
+
 
 void print_help() {
     std::cerr << "Specify a benchmark:" << std::endl;

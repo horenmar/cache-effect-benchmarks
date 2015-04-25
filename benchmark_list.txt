@@ -12,4 +12,3 @@ read_write_map
 read_write_flatmap
 read_heavy_map
 read_heavy_flatmap
-
