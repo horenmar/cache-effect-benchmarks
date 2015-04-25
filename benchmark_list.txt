@@ -6,3 +6,10 @@ sequential_sum_list
 sequential_sum_vector
 vector_element_skip
 random_sum_vector
+read_map
+read_flatmap
+read_write_map
+read_write_flatmap
+read_heavy_map
+read_heavy_flatmap
+
