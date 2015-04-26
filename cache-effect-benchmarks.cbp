@@ -35,6 +35,7 @@
 			<Add option="-std=c++11" />
 		</Compiler>
 		<Unit filename="data_generation.cpp" />
+		<Unit filename="data_generation.h" />
 		<Unit filename="flatmap.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="matrix_multiplication.cpp" />
