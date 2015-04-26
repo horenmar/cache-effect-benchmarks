@@ -12,3 +12,6 @@ read_write_map
 read_write_flatmap
 read_heavy_map
 read_heavy_flatmap
+branch_sums_64k
+branch_sums_4M
+branch_sums_1G

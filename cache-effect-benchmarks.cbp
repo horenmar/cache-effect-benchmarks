@@ -34,6 +34,7 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
 		</Compiler>
+		<Unit filename="cogs/types/counting_iterator.hpp" />
 		<Unit filename="data_generation.cpp" />
 		<Unit filename="data_generation.h" />
 		<Unit filename="flatmap.h" />
