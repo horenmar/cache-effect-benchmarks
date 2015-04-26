@@ -38,7 +38,8 @@ measurements measure_vector_skip(std::size_t first_step, std::size_t last_step);
 measurements measure_random_iteration(std::size_t start_at, std::size_t end_at);
 template <typename Container, std::size_t N_reads, std::size_t N_writes>
 measurements measure_random_access(std::size_t start_at, std::size_t end_at);
-
+template <std::size_t size>
+measurements measure_branch_sums();
 
 void print_results(std::ostream& out, const measurements& results){
     for (const auto& pair : results){
@@ -125,6 +126,22 @@ void read_heavy_flatmap(std::ostream& out){
     print_results(out, results);
 }
 
+void branch_sums_64k(std::ostream& out){
+    auto results = measure_branch_sums<64 * 1024>();
+    out << "Threshold,\t\tMeasure branch sums (64k array)";
+    print_results(out, results);
+}
+void branch_sums_4M(std::ostream& out){
+    auto results = measure_branch_sums<4 * 1024 * 1024>();
+    out << "Threshold,\t\tMeasure branch sums (64k array)";
+    print_results(out, results);
+}
+void branch_sums_1G(std::ostream& out){
+    auto results = measure_branch_sums<1024 * 1024 * 1024>();
+    out << "Threshold,\t\tMeasure branch sums (64k array)";
+    print_results(out, results);
+}
+
 
 using bencher = void (*)(std::ostream&);
 std::map<std::string, bencher> benches = {
@@ -141,9 +158,11 @@ std::map<std::string, bencher> benches = {
     {"read_heavy_map", read_heavy_map},
     {"read_flatmap", read_flatmap},
     {"read_write_flatmap", read_write_flatmap},
-    {"read_heavy_flatmap", read_heavy_flatmap}
+    {"read_heavy_flatmap", read_heavy_flatmap},
+    {"branch_sums_64k", branch_sums_64k},
+    {"branch_sums_4M", branch_sums_4M},
+    {"branch_sums_1G", branch_sums_1G}
 };
-
 
 
 void print_help() {
@@ -364,3 +383,30 @@ measurements measure_random_access(std::size_t start_at, std::size_t end_at){
     std::reverse(begin(results), end(results));
     return results;
 }
+
+template <std::size_t size>
+measurements measure_branch_sums(){
+    std::vector<int> numbers(size);
+    numbers.reserve(size);
+
+    LCG RNG;
+    measurements results;
+    results.reserve(16);
+
+    //init numbers to [0, 10)
+    //Also serves to warmup the cache
+    for (auto& num : numbers){
+        num = RNG.get_next() % 10;
+    }
+
+    for (int i = 0; i < 10; ++i){
+        auto time = bench([=, &numbers](){
+            return std::count_if(begin(numbers), end(numbers), [=](int num){return num < i;});
+        }, rep_count).count();
+
+        results.emplace_back(i, time);
+    }
+
+    return results;
+}
+
