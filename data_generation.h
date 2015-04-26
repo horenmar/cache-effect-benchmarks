@@ -39,8 +39,10 @@ struct generate_random_pairs {
             return myp;
         }
 
-        iterator operator++() {
-            return iterator(par, pos + 1);
+        iterator& operator++() {
+            ++pos;
+            myp = std::make_pair(pos, par.seq[pos]);
+            return *this;
         }
     };
 
