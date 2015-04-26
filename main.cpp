@@ -14,6 +14,7 @@
 #include "data_generation.h"
 #include "utilities.h"
 #include "min_LCG.h"
+#include "cogs/types/counting_iterator.hpp"
 
 constexpr std::size_t rep_count = 10;
 constexpr std::size_t smallest_sequence = 1 << 3;
@@ -98,24 +99,24 @@ void read_map(std::ostream& out){
     out << "N,\t\tRead Map (1 : 0 (read only))\n";
     print_results(out, results);
 }
-void read_flatmap(std::ostream& out){
-    auto results = measure_random_access<flatmap<int, int>, 1, 0>(smallest_map, largest_map);
-    out << "N,\t\tRead Flatmap (1 : 0 (read only))\n";
-    print_results(out, results);
-}
 void read_write_map(std::ostream& out){
     auto results = measure_random_access<std::map<int, int>, 1, 1>(smallest_map, largest_map);
     out << "N,\t\tRead Map (1 : 1 (read, write))\n";
     print_results(out, results);
 }
-void read_write_flatmap(std::ostream& out){
-    auto results = measure_random_access<flatmap<int, int>, 1, 1>(smallest_map, largest_map);
-    out << "N,\t\tRead Flatmap (1 : 1 (read, write))\n";
-    print_results(out, results);
-}
 void read_heavy_map(std::ostream& out){
     auto results = measure_random_access<std::map<int, int>, 15, 1>(smallest_map, largest_map);
     out << "N,\t\tRead Map (15 : 1 (read heavy))\n";
+    print_results(out, results);
+}
+void read_flatmap(std::ostream& out){
+    auto results = measure_random_access<flatmap<int, int>, 1, 0>(smallest_map, largest_map);
+    out << "N,\t\tRead Flatmap (1 : 0 (read only))\n";
+    print_results(out, results);
+}
+void read_write_flatmap(std::ostream& out){
+    auto results = measure_random_access<flatmap<int, int>, 1, 1>(smallest_map, largest_map);
+    out << "N,\t\tRead Flatmap (1 : 1 (read, write))\n";
     print_results(out, results);
 }
 void read_heavy_flatmap(std::ostream& out){
@@ -136,10 +137,10 @@ std::map<std::string, bencher> benches = {
     {"vector_element_skip", vector_element_skip},
     {"random_sum_vector", random_sum_vector},
     {"read_map", read_map},
-    {"read_flatmap", read_flatmap},
     {"read_write_map", read_write_map},
-    {"read_write_flatmap", read_write_flatmap},
     {"read_heavy_map", read_heavy_map},
+    {"read_flatmap", read_flatmap},
+    {"read_write_flatmap", read_write_flatmap},
     {"read_heavy_flatmap", read_heavy_flatmap}
 };
 
@@ -331,20 +332,26 @@ measurements measure_random_access(std::size_t start_at, std::size_t end_at){
     results.reserve(32);
 
     for (auto n = end_at; n >= start_at; n /= 2){
-        auto data_gen = generate_random_pairs(n);
-        Container data(data_gen.begin(), data_gen.end());
-        auto mask = n - 1;
+        auto read_size = n / N_total * N_reads;
+        auto numbers_start = wtf::counting_iterator<int>(1, 2);
+        auto numbers_end = numbers_start + read_size;
+        auto write_iter = wtf::counting_iterator<int>(0, 2);
+        std::vector<std::pair<const int, int>> nums;
+        std::transform(numbers_start, numbers_end, std::back_inserter(nums), [](int i){ return std::pair<const int, int>(i, i);});
+        Container data(begin(nums), end(nums));
+        auto mask = read_size - 1;
 
-        auto time = bench([=, &RNG, &data](){
+        auto time = bench([=, &RNG, &data, &write_iter](){
             uint32_t temp = 0;
 
             for (std::size_t i = 0; i < n; i += N_total){
                 for (std::size_t j = 0; j < N_reads; ++j){
-                    temp += data.find(RNG.get_next() & mask)->second;
+                    temp += data.find(nums[(RNG.get_next() & mask)].first)->second;
                 }
 
                 for (std::size_t j = 0; j < N_writes; ++j) {
-                    data.find(RNG.get_next() & mask)->second = temp;
+                    data.insert(std::make_pair(*write_iter ,*write_iter));
+                    ++write_iter;
                 }
             }
 
