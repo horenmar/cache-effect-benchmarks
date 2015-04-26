@@ -39,7 +39,7 @@ public:
     }
 
     iterator insert(iterator position, const pair_type& elem){
-        data.insert(position, elem);
+        return data.insert(position, elem);
     }
 
     iterator find(const key_type& key){
