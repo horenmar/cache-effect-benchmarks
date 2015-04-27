@@ -105,21 +105,6 @@ void read_heavy_flatmap(std::ostream& out){
     print_results(out, results);
 }
 
-void branch_sums_64k(std::ostream& out){
-    auto results = measure_branch_sums<64 * 1024>();
-    out << "Threshold,\t\tMeasure branch sums (64k array)\n";
-    print_results(out, results);
-}
-void branch_sums_4M(std::ostream& out){
-    auto results = measure_branch_sums<4 * 1024 * 1024>();
-    out << "Threshold,\t\tMeasure branch sums (4M array)\n";
-    print_results(out, results);
-}
-void branch_sums_1G(std::ostream& out){
-    auto results = measure_branch_sums<1024 * 1024 * 1024>();
-    out << "Threshold,\t\tMeasure branch sums (1G array)\n";
-    print_results(out, results);
-}
 
 
 using bencher = void (*)(std::ostream&);
@@ -137,10 +122,7 @@ std::map<std::string, bencher> benches = {
     {"read_heavy_map", read_heavy_map},
     {"read_flatmap", read_flatmap},
     {"read_write_flatmap", read_write_flatmap},
-    {"read_heavy_flatmap", read_heavy_flatmap},
-    {"branch_sums_64k", branch_sums_64k},
-    {"branch_sums_4M", branch_sums_4M},
-    {"branch_sums_1G", branch_sums_1G}
+    {"read_heavy_flatmap", read_heavy_flatmap}
 };
 
 

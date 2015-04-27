@@ -205,31 +205,5 @@ measurements measure_random_access(std::size_t start_at, std::size_t end_at){
     return results;
 }
 
-template <std::size_t size>
-measurements measure_branch_sums(){
-    std::vector<int> numbers(size / sizeof(int));
-    numbers.reserve(size);
-
-    LCG RNG;
-    measurements results;
-    results.reserve(16);
-
-    //init numbers to [0, 10)
-    //Also serves to warmup the cache
-    for (auto& num : numbers){
-        num = RNG.get_next() % 10;
-    }
-
-    for (int i = 0; i < 10; ++i){
-        auto time = bench([=, &numbers](){
-            return std::count_if(begin(numbers), end(numbers), [=](int num){return num < i;});
-        }, rep_count).count();
-
-        results.emplace_back(i, time);
-    }
-
-    return results;
-}
-
 
 #endif
