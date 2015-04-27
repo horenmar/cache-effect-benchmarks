@@ -1,0 +1,12 @@
+Branch prediction benchmark.
+Limit: 0 result: 0 time (ns): 2768838
+Limit: 1 result: 108000 time (ns): 2791390
+Limit: 2 result: 206000 time (ns): 2793140
+Limit: 3 result: 310000 time (ns): 2772715
+Limit: 4 result: 409000 time (ns): 2805154
+Limit: 5 result: 510000 time (ns): 2798547
+Limit: 6 result: 601000 time (ns): 2787331
+Limit: 7 result: 703000 time (ns): 2778575
+Limit: 8 result: 811000 time (ns): 2798627
+Limit: 9 result: 915000 time (ns): 2793888
+Limit: 10 result: 1024000 time (ns): 2766226
