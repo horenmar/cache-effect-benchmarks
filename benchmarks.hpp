@@ -207,7 +207,7 @@ measurements measure_random_access(std::size_t start_at, std::size_t end_at){
 
 template <std::size_t size>
 measurements measure_branch_sums(){
-    std::vector<int> numbers(size);
+    std::vector<int> numbers(size / sizeof(int));
     numbers.reserve(size);
 
     LCG RNG;

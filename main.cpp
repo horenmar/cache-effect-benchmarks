@@ -112,12 +112,12 @@ void branch_sums_64k(std::ostream& out){
 }
 void branch_sums_4M(std::ostream& out){
     auto results = measure_branch_sums<4 * 1024 * 1024>();
-    out << "Threshold,\t\tMeasure branch sums (64k array)\n";
+    out << "Threshold,\t\tMeasure branch sums (4M array)\n";
     print_results(out, results);
 }
 void branch_sums_1G(std::ostream& out){
     auto results = measure_branch_sums<1024 * 1024 * 1024>();
-    out << "Threshold,\t\tMeasure branch sums (64k array)\n";
+    out << "Threshold,\t\tMeasure branch sums (1G array)\n";
     print_results(out, results);
 }
 
