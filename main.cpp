@@ -69,7 +69,7 @@ void vector_element_skip(std::ostream& out){
 }
 
 void random_sum_vector(std::ostream& out){
-    auto results = measure_vector_skip(smallest_step, largest_step);
+    auto results = measure_random_iteration(smallest_sequence, largest_sequence);
     out << "N,\t\tRandom Iteration\n";
     print_results(out, results);
 }
@@ -105,6 +105,16 @@ void read_heavy_flatmap(std::ostream& out){
     print_results(out, results);
 }
 
+void polymorphic_vector(std::ostream& out){
+    auto results = measure_polymorphic_container<ptr_vector<base>>(smallest_poly_sequence, largest_poly_sequence);
+    out << "N,\t\tPolymorphic vector\n";
+    print_results(out, results);
+}
+void polymorphic_sequence(std::ostream& out){
+    auto results = measure_polymorphic_container<poly_collection<base>>(smallest_poly_sequence, largest_poly_sequence);
+    out << "N,\t\tPolymorphic sequence\n";
+    print_results(out, results);
+}
 
 
 using bencher = void (*)(std::ostream&);
@@ -122,7 +132,9 @@ std::map<std::string, bencher> benches = {
     {"read_heavy_map", read_heavy_map},
     {"read_flatmap", read_flatmap},
     {"read_write_flatmap", read_write_flatmap},
-    {"read_heavy_flatmap", read_heavy_flatmap}
+    {"read_heavy_flatmap", read_heavy_flatmap},
+    {"polymorphic_vector", polymorphic_vector},
+    {"polymorphic_sequence", polymorphic_sequence}
 };
 
 
@@ -133,7 +145,14 @@ void print_help() {
     }
 }
 
+void call_first(){
+    polymorphic_vector(std::cout);
+    polymorphic_sequence(std::cout);
+}
+
 int main(int argc, char** argv){
+
+//    call_first();
 
     std::vector<std::string> args(argv+1, argv+argc);
     if (args.size() == 0) {

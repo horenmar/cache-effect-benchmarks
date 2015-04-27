@@ -2,6 +2,8 @@
 #ifndef WTF_BENCHMARKS
 #define WTF_BENCHMARKS
 
+#include "polymorphic_bench.hpp"
+
 constexpr std::size_t rep_count = 10;
 constexpr std::size_t smallest_sequence = 1 << 3;
 constexpr std::size_t largest_sequence = 1 << 27;
@@ -11,7 +13,8 @@ constexpr std::size_t smallest_matrix = 1 << 1;
 constexpr std::size_t largest_matrix = 1 << 11;
 constexpr std::size_t smallest_step = 1 << 0;
 constexpr std::size_t largest_step = 1 << 10;
-
+constexpr std::size_t smallest_poly_sequence = 1 << 8;
+constexpr std::size_t largest_poly_sequence = 1 << 24;
 
 using measurements = std::vector<std::pair<int, std::uint64_t>>;
 
@@ -36,7 +39,7 @@ measurements measure_iteration(std::size_t start_at, std::size_t end_at){
     for (auto n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
         Container test_data(begin(data), end(data));
-        auto time = bench([=](){return std::accumulate(begin(test_data), end(test_data), 0);}, rep_count).count();
+        auto time = bench([&](){return std::accumulate(begin(test_data), end(test_data), 0);}, rep_count).count();
         results.emplace_back(n, time);
     }
 
@@ -65,7 +68,7 @@ measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at
     for (auto n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
         Container test_data(begin(data), end(data));
-        auto time = bench([=](){return std::accumulate(test_data.rbegin(), test_data.rend(), 0);}, rep_count).count();
+        auto time = bench([&](){return std::accumulate(test_data.rbegin(), test_data.rend(), 0);}, rep_count).count();
         results.emplace_back(n, time);
     }
 
@@ -95,7 +98,7 @@ measurements measure_matrix_multiplication(std::size_t start_at, std::size_t end
         auto matrix1 = generate_matrix(n, n);
         auto matrix2 = generate_matrix(n, n);
 
-        auto time = bench([=](){return method(matrix1, matrix2).columns();}, rep_count).count();
+        auto time = bench([&](){return method(matrix1, matrix2).columns();}, rep_count).count();
         results.emplace_back(n, time);
     }
 
@@ -117,7 +120,7 @@ measurements measure_vector_skip(std::size_t first_step, std::size_t last_step){
 
     for (auto step_size = first_step; step_size <= last_step; step_size *= 2){
         auto data = generate_random_sequence(largest_sequence);
-        auto time = bench([=](){
+        auto time = bench([&](){
             uint32_t result = 0;
             for (std::size_t i = 0; i < largest_sequence; i += step_size){
                 result += data[i];
@@ -144,7 +147,7 @@ measurements measure_random_iteration(std::size_t start_at, std::size_t end_at){
     for (auto n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
         auto mask = n - 1;
-        auto time = bench([=, &RNG](){
+        auto time = bench([&](){
             uint32_t temp = 0;
             for (std::size_t i = 0; i < n; ++i){
                 temp += data[RNG.get_next() & mask];
@@ -205,5 +208,27 @@ measurements measure_random_access(std::size_t start_at, std::size_t end_at){
     return results;
 }
 
+template <typename Container>
+measurements measure_polymorphic_container(std::size_t start_at, std::size_t end_at){
+    start_at = lower_power_of_2(std::max(start_at, smallest_poly_sequence));
+    end_at = upper_power_of_2(std::min(end_at, largest_poly_sequence));
+
+    measurements results;
+    results.reserve(32);
+
+    for (auto n = end_at; n >= start_at; n /= 2){
+        auto data = fill<Container>(n);
+        auto time = bench([&](){
+            std::uint32_t temp = 0;
+            data.for_each([&](const base& el){ temp += el.foo(1);});
+            return temp;
+        }, rep_count).count();
+        results.emplace_back(n, time);
+    }
+
+    std::reverse(begin(results), end(results));
+    return results;
+
+}
 
 #endif
