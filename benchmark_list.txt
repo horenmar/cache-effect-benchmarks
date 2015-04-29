@@ -14,3 +14,5 @@ read_heavy_map
 read_heavy_flatmap
 polymorphic_vector
 polymorphic_sequence
+write_map
+write_flatmap

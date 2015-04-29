@@ -75,33 +75,44 @@ void random_sum_vector(std::ostream& out){
 }
 
 void read_map(std::ostream& out){
-    auto results = measure_random_access<std::map<int, int>, 1, 0>(smallest_map, largest_map);
+    auto results = measure_random_access<std::map<int, BFPOD>, 1, 0>(smallest_map, largest_map);
     out << "N,\t\tRead Map (1 : 0 (read only))\n";
     print_results(out, results);
 }
 void read_write_map(std::ostream& out){
-    auto results = measure_random_access<std::map<int, int>, 1, 1>(smallest_map, largest_map);
+    auto results = measure_random_access<std::map<int, BFPOD>, 1, 1>(smallest_map, largest_map);
     out << "N,\t\tRead Map (1 : 1 (read, write))\n";
     print_results(out, results);
 }
 void read_heavy_map(std::ostream& out){
-    auto results = measure_random_access<std::map<int, int>, 15, 1>(smallest_map, largest_map);
+    auto results = measure_random_access<std::map<int, BFPOD>, 15, 1>(smallest_map, largest_map);
     out << "N,\t\tRead Map (15 : 1 (read heavy))\n";
     print_results(out, results);
 }
 void read_flatmap(std::ostream& out){
-    auto results = measure_random_access<flatmap<int, int>, 1, 0>(smallest_map, largest_map);
+    auto results = measure_random_access<flatmap<int, BFPOD>, 1, 0>(smallest_map, largest_map);
     out << "N,\t\tRead Flatmap (1 : 0 (read only))\n";
     print_results(out, results);
 }
 void read_write_flatmap(std::ostream& out){
-    auto results = measure_random_access<flatmap<int, int>, 1, 1>(smallest_map, largest_map);
+    auto results = measure_random_access<flatmap<int, BFPOD>, 1, 1>(smallest_map, largest_map);
     out << "N,\t\tRead Flatmap (1 : 1 (read, write))\n";
     print_results(out, results);
 }
 void read_heavy_flatmap(std::ostream& out){
-    auto results = measure_random_access<flatmap<int, int>, 15, 1>(smallest_map, largest_map);
+    auto results = measure_random_access<flatmap<int, BFPOD>, 15, 1>(smallest_map, largest_map);
     out << "N,\t\tRead Flatmap (15 : 1 (read heavy))\n";
+    print_results(out, results);
+}
+
+void write_map(std::ostream& out){
+    auto results = measure_write<std::map<int, BFPOD>>();
+    out << "N,\t\tWrite Map\n";
+    print_results(out, results);
+}
+void write_flatmap(std::ostream& out){
+    auto results = measure_write<flatmap<int, BFPOD>>();
+    out << "N,\t\tWrite Flatmap\n";
     print_results(out, results);
 }
 
@@ -134,7 +145,9 @@ std::map<std::string, bencher> benches = {
     {"read_write_flatmap", read_write_flatmap},
     {"read_heavy_flatmap", read_heavy_flatmap},
     {"polymorphic_vector", polymorphic_vector},
-    {"polymorphic_sequence", polymorphic_sequence}
+    {"polymorphic_sequence", polymorphic_sequence},
+    {"write_map", write_map},
+    {"write_flatmap", write_flatmap}
 };
 
 

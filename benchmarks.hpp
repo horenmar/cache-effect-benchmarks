@@ -8,7 +8,7 @@ constexpr std::size_t rep_count = 10;
 constexpr std::size_t smallest_sequence = 1 << 3;
 constexpr std::size_t largest_sequence = 1 << 25;
 constexpr std::size_t smallest_map = 1 << 3;
-constexpr std::size_t largest_map = 1 << 23; //Separate from sequence, because at 1 << 27, maps were untractable.
+constexpr std::size_t largest_map = 1 << 15; //Separate from sequence, because at 1 << 27, maps were untractable.
 constexpr std::size_t smallest_matrix = 1 << 1;
 constexpr std::size_t largest_matrix = 1 << 11;
 constexpr std::size_t smallest_step = 1 << 0;
@@ -161,6 +161,12 @@ measurements measure_random_iteration(std::size_t start_at, std::size_t end_at){
     return results;
 }
 
+#include <array>
+
+struct BFPOD {
+    std::array<uint8_t, 4096> stuffing = {};
+};
+
 /* Random reads, writes.
  */
 template <typename Container, std::size_t N_reads, std::size_t N_writes>
@@ -179,9 +185,9 @@ measurements measure_random_access(std::size_t start_at, std::size_t end_at){
         auto numbers_start = wtf::counting_iterator<int>(1, 2);
         auto numbers_end = numbers_start + read_size;
         auto write_iter = wtf::counting_iterator<int>(0, 2);
-        std::vector<std::pair<const int, int>> nums;
-        std::transform(numbers_start, numbers_end, std::back_inserter(nums), [](int i){ return std::pair<const int, int>(i, i);});
-        Container data(begin(nums), end(nums));
+        std::vector<int> nums(numbers_start, numbers_end);
+        Container data;
+        std::transform(begin(nums), end(nums), std::inserter(data, data.end()), [](int i){ return std::pair<const int, BFPOD>(i, BFPOD{});});
         auto mask = read_size - 1;
 
         auto time = bench([=, &RNG, &data, &write_iter](){
@@ -189,11 +195,11 @@ measurements measure_random_access(std::size_t start_at, std::size_t end_at){
 
             for (std::size_t i = 0; i < n; i += N_total){
                 for (std::size_t j = 0; j < N_reads; ++j){
-                    temp += data.find(nums[(RNG.get_next() & mask)].first)->second;
+                    temp += data.find(nums[(RNG.get_next() & mask)])->first;
                 }
 
                 for (std::size_t j = 0; j < N_writes; ++j) {
-                    data.insert(std::make_pair(*write_iter ,*write_iter));
+                    data.insert(std::make_pair(*write_iter ,BFPOD{}));
                     ++write_iter;
                 }
             }
@@ -229,6 +235,43 @@ measurements measure_polymorphic_container(std::size_t start_at, std::size_t end
     std::reverse(begin(results), end(results));
     return results;
 
+}
+
+
+template <typename Container>
+measurements measure_write(){
+    auto start_at = smallest_map;
+    auto end_at = largest_map;
+
+    measurements results;
+    results.reserve(32);
+
+    for (auto n = end_at; n >= start_at; n /= 2){
+        auto numbers_start = wtf::counting_iterator<int>(1, 2);
+        auto numbers_end = numbers_start + n;
+
+        auto write_iter = wtf::counting_iterator<int>(0, 2);
+        Container data;
+        std::transform(numbers_start, numbers_end, std::inserter(data, data.end()), [](int i){ return std::pair<const int, BFPOD>(i, BFPOD{});});
+
+        auto time = bench([=, &data, &write_iter](){
+            uint32_t temp = 0;
+
+            for (std::size_t i = 0; i < n; ++i){
+                if (data.insert(std::make_pair(*write_iter ,BFPOD{})).second) {
+                    write_iter++;
+                    temp++;
+                }
+            }
+
+            return temp;
+        }, rep_count).count();
+
+        results.emplace_back(n, time);
+    }
+
+    std::reverse(begin(results), end(results));
+    return results;
 }
 
 #endif
