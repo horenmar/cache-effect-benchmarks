@@ -6,9 +6,9 @@
 
 constexpr std::size_t rep_count = 10;
 constexpr std::size_t smallest_sequence = 1 << 3;
-constexpr std::size_t largest_sequence = 1 << 27;
+constexpr std::size_t largest_sequence = 1 << 25;
 constexpr std::size_t smallest_map = 1 << 3;
-constexpr std::size_t largest_map = 1 << 25; //Separate from sequence, because at 1 << 27, maps were untractable.
+constexpr std::size_t largest_map = 1 << 23; //Separate from sequence, because at 1 << 27, maps were untractable.
 constexpr std::size_t smallest_matrix = 1 << 1;
 constexpr std::size_t largest_matrix = 1 << 11;
 constexpr std::size_t smallest_step = 1 << 0;
@@ -68,7 +68,7 @@ measurements measure_reversed_iteration(std::size_t start_at, std::size_t end_at
     for (auto n = end_at; n >= start_at; n /= 2){
         auto data = generate_random_sequence(n);
         Container test_data(begin(data), end(data));
-        auto time = bench([&](){return std::accumulate(test_data.rbegin(), test_data.rend(), 0);}, rep_count).count();
+        auto time = bench([&](){return std::accumulate(test_data.rbegin(), test_data.rend(), 0u);}, rep_count).count();
         results.emplace_back(n, time);
     }
 

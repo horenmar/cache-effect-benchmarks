@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1430086145 source:/home/martin/work/cache-effect-benchmarks/main.cpp
+1430156283 source:/home/martin/work/cache-effect-benchmarks/main.cpp
 	<iostream>
 	<vector>
 	<utility>
@@ -16,6 +16,7 @@
 	"utilities.h"
 	"min_LCG.h"
 	"cogs/types/counting_iterator.hpp"
+	"benchmarks.hpp"
 
 1426279742 /home/martin/work/cache-effect-benchmarks/matrix_multiplication.h
 	<vector>
@@ -54,7 +55,7 @@
 1427624654 /home/martin/work/cache-effect-benchmarks/min_LCG.h
 	<cstdint>
 
-1430075938 /home/martin/work/cache-effect-benchmarks/cogs/types/counting_iterator.hpp
+1430123638 /home/martin/work/cache-effect-benchmarks/cogs/types/counting_iterator.hpp
 	<type_traits>
 	<iterator>
 	<limits>
@@ -65,4 +66,21 @@
 
 1430065868 /home/martin/work/cache-effect-benchmarks/cogs/utility/spaceship.hpp
 	<string>
+
+1430332370 /home/martin/work/cache-effect-benchmarks/benchmarks.hpp
+	"polymorphic_bench.hpp"
+
+1430139823 source:/home/martin/work/cache-effect-benchmarks/polymorphic_bench.cpp
+	<memory>
+	<vector>
+	<algorithm>
+	<type_traits>
+
+1430148420 /home/martin/work/cache-effect-benchmarks/polymorphic_bench.hpp
+	<memory>
+	<vector>
+	<algorithm>
+	<type_traits>
+	<typeindex>
+	<map>
 

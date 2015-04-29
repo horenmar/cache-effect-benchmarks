@@ -28,12 +28,19 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
+			<Target title="Release-changed">
+				<Option output="bin/Release-changed/cache-effect-benchmarks" prefix_auto="1" extension_auto="1" />
+				<Option object_output="/obj/Release-changed/" />
+				<Option type="1" />
+				<Option compiler="clang" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-pedantic" />
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
 		</Compiler>
+		<Unit filename="benchmarks.hpp" />
 		<Unit filename="cogs/types/counting_iterator.hpp" />
 		<Unit filename="data_generation.cpp" />
 		<Unit filename="data_generation.h" />
@@ -43,6 +50,7 @@
 		<Unit filename="matrix_multiplication.h" />
 		<Unit filename="measuring_bench.h" />
 		<Unit filename="min_LCG.h" />
+		<Unit filename="polymorphic_bench.hpp" />
 		<Unit filename="utilities.cpp" />
 		<Unit filename="utilities.h" />
 		<Extensions>
