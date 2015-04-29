@@ -1,12 +1,12 @@
 Branch prediction benchmark.
-Limit: 0 result: 0 time (ns): 3671649
-Limit: 1 result: 108000 time (ns): 4322313
-Limit: 2 result: 206000 time (ns): 3869385
-Limit: 3 result: 310000 time (ns): 3936247
-Limit: 4 result: 409000 time (ns): 3210502
-Limit: 5 result: 510000 time (ns): 2862801
-Limit: 6 result: 601000 time (ns): 2765294
-Limit: 7 result: 703000 time (ns): 3393230
-Limit: 8 result: 811000 time (ns): 2837128
-Limit: 9 result: 915000 time (ns): 2719966
-Limit: 10 result: 1024000 time (ns): 2554479
+Limit: 0 result: 0 time (ns): 2853903
+Limit: 1 result: 108000 time (ns): 4176771
+Limit: 2 result: 206000 time (ns): 3869122
+Limit: 3 result: 310000 time (ns): 3671081
+Limit: 4 result: 409000 time (ns): 2916840
+Limit: 5 result: 510000 time (ns): 2733009
+Limit: 6 result: 601000 time (ns): 2673450
+Limit: 7 result: 703000 time (ns): 2690606
+Limit: 8 result: 811000 time (ns): 2668395
+Limit: 9 result: 915000 time (ns): 2651521
+Limit: 10 result: 1024000 time (ns): 2556031
