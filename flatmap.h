@@ -23,7 +23,7 @@ public:
     template <typename InputIterator>
     flatmap(InputIterator first, InputIterator last)
     :data{first, last}{
-        std::sort(std::begin(data), std::end(data));
+        std::sort(std::begin(data), std::end(data), [](const value_type& lhs, const value_type& rhs) {return lhs.first < rhs.first;} );
     }
     flatmap(std::initializer_list<value_type> elems)
     :flatmap(std::begin(elems), std::end(elems)){}
@@ -44,7 +44,7 @@ public:
 
     iterator find(const key_type& key){
         value_type key_dummy (key, mapped_type());
-        auto it = std::lower_bound(std::begin(data), std::end(data), key_dummy);
+        auto it = std::lower_bound(std::begin(data), std::end(data), key_dummy, [](const value_type& key, const value_type& val) {return key.first < val.first;} );
         if (it != std::end(data) && it->first == key){
             return it;
         } else {
@@ -60,19 +60,19 @@ public:
     }
 
     const_iterator begin() const {
-        return begin(data);
+        return std::begin(data);
     }
 
     const_iterator end() const {
-        return end(data);
+        return std::end(data);
     }
 
     iterator begin() {
-        return begin(data);
+        return std::begin(data);
     }
 
     iterator end() {
-        return end(data);
+        return std::end(data);
     }
 
 private:
